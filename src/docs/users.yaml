@@ -1,0 +1,282 @@
+paths:
+  /api/users:
+    get:
+      tags:
+        - Users
+      summary: Get all users
+      description: Returns a list of all users.
+      responses:
+        "200":
+          description: Users retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UsersResponse"
+              examples:
+                success:
+                  value:
+                    status: "success"
+                    payload:
+                      - _id: "65f0c2a9a1b2c3d4e5f67890"
+                        first_name: "Alberto"
+                        last_name: "Perez"
+                        email: "alberto@mail.com"
+                        password: "$2b$10$hashed..."
+                        role: "user"
+                        pets: []
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /api/users/{uid}:
+    get:
+      tags:
+        - Users
+      summary: Get user by id
+      description: Returns a single user by Mongo ObjectId.
+      parameters:
+        - name: uid
+          in: path
+          required: true
+          description: User id (Mongo ObjectId)
+          schema:
+            type: string
+      responses:
+        "200":
+          description: User retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserResponse"
+              examples:
+                success:
+                  value:
+                    status: "success"
+                    payload:
+                      _id: "65f0c2a9a1b2c3d4e5f67890"
+                      first_name: "Alberto"
+                      last_name: "Perez"
+                      email: "alberto@mail.com"
+                      password: "$2b$10$hashed..."
+                      role: "user"
+                      pets:
+                        - _id: "65f0c2a9a1b2c3d4e5f60001"
+        "404":
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                notFound:
+                  value:
+                    status: "error"
+                    error: "User not found"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+    put:
+      tags:
+        - Users
+      summary: Update user by id
+      description: Updates an existing user.
+      parameters:
+        - name: uid
+          in: path
+          required: true
+          description: User id (Mongo ObjectId)
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserUpdateRequest"
+            examples:
+              updateNames:
+                value:
+                  first_name: "NuevoNombre"
+                  last_name: "NuevoApellido"
+              updateRole:
+                value:
+                  role: "admin"
+      responses:
+        "200":
+          description: User updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageResponse"
+              examples:
+                updated:
+                  value:
+                    status: "success"
+                    message: "User updated"
+        "404":
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                notFound:
+                  value:
+                    status: "error"
+                    error: "User not found"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+    delete:
+      tags:
+        - Users
+      summary: Delete user by id
+      description: |
+        Deletes a user by id.
+        Note: current implementation responds "User deleted" (make sure your service deletes if required).
+      parameters:
+        - name: uid
+          in: path
+          required: true
+          description: User id (Mongo ObjectId)
+          schema:
+            type: string
+      responses:
+        "200":
+          description: User deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageResponse"
+              examples:
+                deleted:
+                  value:
+                    status: "success"
+                    message: "User deleted"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+components:
+  schemas:
+    PetRef:
+      type: object
+      properties:
+        _id:
+          type: string
+          description: Pet Mongo ObjectId
+      example:
+        _id: "65f0c2a9a1b2c3d4e5f60001"
+
+    User:
+      type: object
+      properties:
+        _id:
+          type: string
+          description: Mongo ObjectId
+        first_name:
+          type: string
+        last_name:
+          type: string
+        email:
+          type: string
+        password:
+          type: string
+          description: Hashed password
+        role:
+          type: string
+          default: "user"
+        pets:
+          type: array
+          items:
+            $ref: "#/components/schemas/PetRef"
+      required:
+        - first_name
+        - last_name
+        - email
+        - password
+      example:
+        _id: "65f0c2a9a1b2c3d4e5f67890"
+        first_name: "Alberto"
+        last_name: "Perez"
+        email: "alberto@mail.com"
+        password: "$2b$10$hashed..."
+        role: "user"
+        pets: []
+
+    UserUpdateRequest:
+      type: object
+      description: Fields allowed to update.
+      properties:
+        first_name:
+          type: string
+        last_name:
+          type: string
+        email:
+          type: string
+        password:
+          type: string
+        role:
+          type: string
+        pets:
+          type: array
+          items:
+            $ref: "#/components/schemas/PetRef"
+
+    UsersResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: "success"
+        payload:
+          type: array
+          items:
+            $ref: "#/components/schemas/User"
+
+    UserResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: "success"
+        payload:
+          $ref: "#/components/schemas/User"
+
+    MessageResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: "success"
+        message:
+          type: string
+      example:
+        status: "success"
+        message: "User updated"
+
+    ErrorResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: "error"
+        error:
+          type: string
+      example:
+        status: "error"
+        error: "User not found"

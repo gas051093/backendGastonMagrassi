@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import { usersService } from "../services/index.js"
 
 const getAllUsers = async(req,res)=>{
@@ -7,6 +8,7 @@ const getAllUsers = async(req,res)=>{
 
 const getUser = async(req,res)=> {
     const userId = req.params.uid;
+    if(!mongoose.isValidObjectId(userId)) return res.status(400).send({ status: "error", error: "id invalido" });
     const user = await usersService.getUserById(userId);
     if(!user) return res.status(404).send({status:"error",error:"User not found"})
     res.send({status:"success",payload:user})
@@ -15,6 +17,8 @@ const getUser = async(req,res)=> {
 const updateUser =async(req,res)=>{
     const updateBody = req.body;
     const userId = req.params.uid;
+    if (!mongoose.isValidObjectId(userId))
+      return res.status(400).send({ status: "error", error: "id invalido" });
     const user = await usersService.getUserById(userId);
     if(!user) return res.status(404).send({status:"error", error:"User not found"})
     const result = await usersService.update(userId,updateBody);
@@ -23,8 +27,12 @@ const updateUser =async(req,res)=>{
 
 const deleteUser = async(req,res) =>{
     const userId = req.params.uid;
-    const result = await usersService.getUserById(userId);
-    res.send({status:"success",message:"User deleted"})
+    if (!mongoose.isValidObjectId(userId))
+      return res.status(400).send({ status: "error", error: "id invalido" });
+    const user = await usersService.getUserById(userId);
+    if (!user) return res.status(404).send({ status: "error", error: "User not found" });
+    const deleteUser = await usersService.deleteUser(userId)
+    res.send({status:"success",message:"User deleted", payload: deleteUser})
 }
 
 export default {

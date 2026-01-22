@@ -17,7 +17,7 @@ const createAdoption = async(req,res)=>{
     const user = await usersService.getUserById(uid);
     if(!user) return res.status(404).send({status:"error", error:"user Not found"});
     const pet = await petsService.getBy({_id:pid});
-    if(!pet) return res.status(404).send({status:"error",error:"Pet not found"});
+    if(!pet) return res.status(404).send({status:"error",error:"Pet Not found"});
     if(pet.adopted) return res.status(400).send({status:"error",error:"Pet is already adopted"});
     user.pets.push(pet._id);
     await usersService.update(user._id,{pets:user.pets})
