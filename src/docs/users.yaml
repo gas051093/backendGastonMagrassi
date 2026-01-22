@@ -1,8 +1,7 @@
 paths:
   /api/users:
     get:
-      tags:
-        - Users
+      tags: [Users]
       summary: Get all users
       description: Returns a list of all users.
       responses:
@@ -12,38 +11,16 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/UsersResponse"
-              examples:
-                success:
-                  value:
-                    status: "success"
-                    payload:
-                      - _id: "65f0c2a9a1b2c3d4e5f67890"
-                        first_name: "Alberto"
-                        last_name: "Perez"
-                        email: "alberto@mail.com"
-                        password: "$2b$10$hashed..."
-                        role: "user"
-                        pets: []
         "500":
-          description: Internal server error
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
+          $ref: "#/components/responses/InternalServerError"
 
   /api/users/{uid}:
     get:
-      tags:
-        - Users
+      tags: [Users]
       summary: Get user by id
-      description: Returns a single user by Mongo ObjectId.
+      description: Returns a user by Mongo ObjectId.
       parameters:
-        - name: uid
-          in: path
-          required: true
-          description: User id (Mongo ObjectId)
-          schema:
-            type: string
+        - $ref: "#/components/parameters/UserId"
       responses:
         "200":
           description: User retrieved successfully
@@ -51,63 +28,25 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/UserResponse"
-              examples:
-                success:
-                  value:
-                    status: "success"
-                    payload:
-                      _id: "65f0c2a9a1b2c3d4e5f67890"
-                      first_name: "Alberto"
-                      last_name: "Perez"
-                      email: "alberto@mail.com"
-                      password: "$2b$10$hashed..."
-                      role: "user"
-                      pets:
-                        - _id: "65f0c2a9a1b2c3d4e5f60001"
+        "400":
+          $ref: "#/components/responses/InvalidId"
         "404":
-          description: User not found
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-              examples:
-                notFound:
-                  value:
-                    status: "error"
-                    error: "User not found"
+          $ref: "#/components/responses/UserNotFound"
         "500":
-          description: Internal server error
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
+          $ref: "#/components/responses/InternalServerError"
 
     put:
-      tags:
-        - Users
+      tags: [Users]
       summary: Update user by id
       description: Updates an existing user.
       parameters:
-        - name: uid
-          in: path
-          required: true
-          description: User id (Mongo ObjectId)
-          schema:
-            type: string
+        - $ref: "#/components/parameters/UserId"
       requestBody:
         required: true
         content:
           application/json:
             schema:
               $ref: "#/components/schemas/UserUpdateRequest"
-            examples:
-              updateNames:
-                value:
-                  first_name: "NuevoNombre"
-                  last_name: "NuevoApellido"
-              updateRole:
-                value:
-                  role: "admin"
       responses:
         "200":
           description: User updated successfully
@@ -120,58 +59,93 @@ paths:
                   value:
                     status: "success"
                     message: "User updated"
+        "400":
+          $ref: "#/components/responses/InvalidId"
         "404":
-          description: User not found
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-              examples:
-                notFound:
-                  value:
-                    status: "error"
-                    error: "User not found"
+          $ref: "#/components/responses/UserNotFound"
         "500":
-          description: Internal server error
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
+          $ref: "#/components/responses/InternalServerError"
 
     delete:
-      tags:
-        - Users
+      tags: [Users]
       summary: Delete user by id
-      description: |
-        Deletes a user by id.
-        Note: current implementation responds "User deleted" (make sure your service deletes if required).
+      description: Deletes a user by Mongo ObjectId.
       parameters:
-        - name: uid
-          in: path
-          required: true
-          description: User id (Mongo ObjectId)
-          schema:
-            type: string
+        - $ref: "#/components/parameters/UserId"
       responses:
         "200":
           description: User deleted successfully
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/MessageResponse"
+                $ref: "#/components/schemas/DeleteUserResponse"
               examples:
                 deleted:
                   value:
                     status: "success"
                     message: "User deleted"
+                    payload:
+                      _id: "65f0c2a9a1b2c3d4e5f67890"
+                      first_name: "Alberto"
+                      last_name: "Perez"
+                      email: "alberto@mail.com"
+                      password: "$2b$10$hashed..."
+                      role: "user"
+                      pets: []
+        "400":
+          $ref: "#/components/responses/InvalidId"
+        "404":
+          $ref: "#/components/responses/UserNotFound"
         "500":
-          description: Internal server error
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
+          $ref: "#/components/responses/InternalServerError"
 
 components:
+  parameters:
+    UserId:
+      name: uid
+      in: path
+      required: true
+      description: User id (Mongo ObjectId)
+      schema:
+        type: string
+
+  responses:
+    InvalidId:
+      description: Invalid user id
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+          examples:
+            invalidId:
+              value:
+                status: "error"
+                error: "id invalido"
+
+    UserNotFound:
+      description: User not found
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+          examples:
+            notFound:
+              value:
+                status: "error"
+                error: "User not found"
+
+    InternalServerError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+          examples:
+            serverError:
+              value:
+                status: "error"
+                error: "Internal server error"
+
   schemas:
     PetRef:
       type: object
@@ -179,15 +153,12 @@ components:
         _id:
           type: string
           description: Pet Mongo ObjectId
-      example:
-        _id: "65f0c2a9a1b2c3d4e5f60001"
 
     User:
       type: object
       properties:
         _id:
           type: string
-          description: Mongo ObjectId
         first_name:
           type: string
         last_name:
@@ -199,7 +170,7 @@ components:
           description: Hashed password
         role:
           type: string
-          default: "user"
+          example: "user"
         pets:
           type: array
           items:
@@ -209,14 +180,6 @@ components:
         - last_name
         - email
         - password
-      example:
-        _id: "65f0c2a9a1b2c3d4e5f67890"
-        first_name: "Alberto"
-        last_name: "Perez"
-        email: "alberto@mail.com"
-        password: "$2b$10$hashed..."
-        role: "user"
-        pets: []
 
     UserUpdateRequest:
       type: object
@@ -265,9 +228,19 @@ components:
           example: "success"
         message:
           type: string
-      example:
-        status: "success"
-        message: "User updated"
+          example: "User updated"
+
+    DeleteUserResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: "success"
+        message:
+          type: string
+          example: "User deleted"
+        payload:
+          $ref: "#/components/schemas/User"
 
     ErrorResponse:
       type: object
@@ -277,6 +250,3 @@ components:
           example: "error"
         error:
           type: string
-      example:
-        status: "error"
-        error: "User not found"

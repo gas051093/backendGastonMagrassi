@@ -31,8 +31,8 @@ const deleteUser = async(req,res) =>{
       return res.status(400).send({ status: "error", error: "id invalido" });
     const user = await usersService.getUserById(userId);
     if (!user) return res.status(404).send({ status: "error", error: "User not found" });
-    const deleteUser = await usersService.deleteUser(userId)
-    res.send({status:"success",message:"User deleted", payload: deleteUser})
+    const deletedUser = await usersService.deleteUser(userId)
+    res.send({status:"success",message:"User deleted", payload: deletedUser})
 }
 
 export default {
