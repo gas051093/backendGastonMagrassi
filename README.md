@@ -37,8 +37,8 @@ Tags disponibles:
 - Archivo `.env` en la raíz del proyecto con las siguientes variables:
 
 ```env
-URLMONGO='mongodb+srv://csistemasApp:14025843@cluster0.amq8wip.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0'
-DBNAME='demoPets'
+URLMONGO=mongodb+srv://csistemasApp:14025843@cluster0.amq8wip.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0
+DBNAME=demoPets
 PORT=4000
 ```
 
